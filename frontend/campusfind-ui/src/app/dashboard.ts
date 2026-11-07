@@ -1,3 +1,4 @@
+﻿import { environment } from '../environments/environment';
 
 import { DatePipe, UpperCasePipe } from '@angular/common';
 
@@ -297,7 +298,7 @@ markNotificationAsRead(notification: Notification): void {
           type: report.item_type === 'lost' ? 'Lost' : 'Found',
 
           image: report.image_url
-            ? `http://127.0.0.1:8000${report.image_url}`
+            ? `${environment.apiUrl}${report.image_url}`
             : 'https://placehold.co/700x450?text=No+Image',
 
           status: report.item_type === 'lost'
@@ -558,3 +559,4 @@ markNotificationAsRead(notification: Notification): void {
     this.openReportForm(type);
   }
 }
+

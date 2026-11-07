@@ -2,6 +2,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface RegisterRequest {
   name: string;
@@ -25,7 +26,7 @@ export interface AuthResponse {
 export class AuthService {
 
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://127.0.0.1:8000/auth';
+  private readonly api = `${environment.apiUrl}/auth`;
 
   readonly isLoggedIn = signal(
     !!localStorage.getItem('campusfind_token')

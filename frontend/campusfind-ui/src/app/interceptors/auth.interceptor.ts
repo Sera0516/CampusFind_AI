@@ -1,10 +1,11 @@
+﻿import { environment } from '../../environments/environment';
 
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = environment.apiUrl;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
@@ -34,3 +35,4 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     })
   );
 };
+

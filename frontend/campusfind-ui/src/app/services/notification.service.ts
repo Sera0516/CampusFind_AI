@@ -2,6 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Notification {
   id: number;
@@ -26,8 +27,7 @@ export class NotificationService {
 
   private readonly http = inject(HttpClient);
 
-  private readonly api =
-    'http://127.0.0.1:8000/notifications';
+  private readonly api = `${environment.apiUrl}/notifications`;
 
   getNotifications(): Observable<Notification[]> {
     return this.http.get<Notification[]>(

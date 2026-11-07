@@ -2,6 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 // Claim response interface
 export interface Claim {
@@ -34,7 +35,7 @@ export class ClaimService {
 
   private readonly http = inject(HttpClient);
 
-  private readonly api = 'http://127.0.0.1:8000/claims';
+  private readonly api = `${environment.apiUrl}/claims`;
 
   // Submit a claim for a found item
   createClaim(data: ClaimCreate): Observable<Claim> {

@@ -1,3 +1,4 @@
+﻿import { environment } from '../../environments/environment';
 
 import {
   Component,
@@ -93,7 +94,7 @@ export class MyReports implements OnInit {
       return imageUrl;
     }
 
-    return `http://127.0.0.1:8000${imageUrl}`;
+    return `${environment.apiUrl}${imageUrl}`;
   }
 
   // Format report type
@@ -304,3 +305,4 @@ export class MyReports implements OnInit {
     this.loadMyReports();
   }
 }
+

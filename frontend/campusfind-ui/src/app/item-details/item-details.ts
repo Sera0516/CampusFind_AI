@@ -1,3 +1,4 @@
+﻿import { environment } from '../../environments/environment';
 
 import {
   Component,
@@ -207,6 +208,7 @@ export class ItemDetails implements OnInit {
       return imageUrl;
     }
 
-    return `http://127.0.0.1:8000${imageUrl}`;
+    return `${environment.apiUrl}${imageUrl}`;
   }
 }
+
