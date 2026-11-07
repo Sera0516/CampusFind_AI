@@ -17,38 +17,35 @@ pwd_context = CryptContext(
 ALGORITHM = "HS256"
 
 
-# Hash user password
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
-# Verify user password
 def verify_password(password: str, hashed: str) -> bool:
-    return pwd_context.verify(password, hashed)
+    try:
+        return pwd_context.verify(password, hashed)
+    except (ValueError, TypeError):
+        return False
 
 
-# Generate JWT access token
 def create_access_token(subject: str) -> str:
     expires = datetime.now(timezone.utc) + timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
     payload = {
-        "sub": subject,
+        "sub": str(subject),
         "exp": expires
     }
 
-    token = jwt.encode(
+    return jwt.encode(
         payload,
         SECRET_KEY,
         algorithm=ALGORITHM
     )
 
-    return token
 
-
-# Validate JWT access token
-def verify_access_token(token: str):
+def verify_access_token(token: str) -> str | None:
     try:
         payload = jwt.decode(
             token,
@@ -58,12 +55,10 @@ def verify_access_token(token: str):
 
         subject = payload.get("sub")
 
-        if subject is None:
-            print("JWT ERROR: Missing subject")
+        if not isinstance(subject, str) or not subject.strip():
             return None
 
         return subject
 
-    except JWTError as exc:
-        print("JWT VALIDATION ERROR:", repr(exc))
+    except JWTError:
         return None
