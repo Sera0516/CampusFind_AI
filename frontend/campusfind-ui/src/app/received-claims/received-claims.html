@@ -1,0 +1,263 @@
+
+<div class="received-claims-page">
+
+  <!-- Header -->
+  <header class="claims-header">
+    <button class="back-button" (click)="goBack()">
+      ← Back to Dashboard
+    </button>
+
+    <div class="header-brand">
+      <span class="brand-icon">C</span>
+      <span>CampusFind <strong>AI</strong></span>
+    </div>
+  </header>
+
+  <main class="claims-container">
+
+    <!-- Page Heading -->
+    <div class="page-heading">
+      <p class="eyebrow">CLAIM MANAGEMENT</p>
+      <h1>Received Claims</h1>
+      <p>
+        Review ownership claims submitted by students for items you reported.
+      </p>
+    </div>
+
+    <!-- Success Message -->
+    @if (successMessage) {
+      <div class="claim-alert success-alert">
+        ✓ {{ successMessage }}
+      </div>
+    }
+
+    <!-- Review Error -->
+    @if (reviewError) {
+      <div class="claim-alert error-alert">
+        {{ reviewError }}
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (loading) {
+      <div class="state-card">
+        <div class="loader"></div>
+        <p>Loading received claims...</p>
+      </div>
+    }
+
+    <!-- API Error -->
+    @else if (errorMessage) {
+      <div class="state-card error-state">
+        <h2>Unable to load claims</h2>
+        <p>{{ errorMessage }}</p>
+
+        <button class="primary-button" (click)="loadReceivedClaims()">
+          Try Again
+        </button>
+      </div>
+    }
+
+    <!-- Claims Available -->
+    @else if (claims.length > 0) {
+
+      <!-- Summary -->
+      <div class="claims-summary">
+
+        <div class="summary-card">
+          <span>Total Claims</span>
+          <strong>{{ claims.length }}</strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Pending</span>
+          <strong>
+            {{ claims.filter(c => c.status === 'pending').length }}
+          </strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Approved</span>
+          <strong>
+            {{ claims.filter(c => c.status === 'approved').length }}
+          </strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Rejected</span>
+          <strong>
+            {{ claims.filter(c => c.status === 'rejected').length }}
+          </strong>
+        </div>
+
+      </div>
+
+      <!-- Claims List -->
+      <section class="claims-list">
+
+        @for (claim of claims; track claim.id) {
+
+          <article
+            class="claim-card"
+            [id]="'claim-' + claim.id"
+            [class.selected-claim]="selectedClaimId === claim.id"
+          >
+
+
+            <!-- Card Header -->
+            <div class="claim-card-header">
+
+              <div>
+                <p class="claim-reference">
+                  CLAIM #{{ claim.id }}
+                </p>
+
+                <h2>
+                  {{ claim.item?.title || 'Loading item details...' }}
+                </h2>
+              </div>
+
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(claim.status)"
+              >
+                {{ claim.status | titlecase }}
+              </span>
+
+            </div>
+
+            <!-- Item Information -->
+            <div class="claim-information">
+
+              <div>
+                <small>Item Report ID</small>
+                <strong>#{{ claim.item_id }}</strong>
+              </div>
+
+              <div>
+                <small>Claimant User ID</small>
+                <strong>#{{ claim.claimant_id }}</strong>
+              </div>
+
+              <div>
+                <small>Submitted On</small>
+                <strong>{{ claim.created_at | date:'medium' }}</strong>
+              </div>
+
+            </div>
+
+            <!-- Claimant Explanation -->
+            <div class="claim-explanation">
+              <h3>Claimant's Explanation</h3>
+              <p>{{ claim.message }}</p>
+            </div>
+
+            <!-- Existing Owner Response -->
+            @if (claim.owner_response) {
+              <div class="owner-response">
+                <h3>Your Response</h3>
+                <p>{{ claim.owner_response }}</p>
+              </div>
+            }
+
+            <!-- Review Form -->
+            @if (claim.status === 'pending') {
+
+              <div class="review-section">
+
+                <h3>Review This Claim</h3>
+
+                <label [for]="'response-' + claim.id">
+                  Your response to the claimant (optional)
+                </label>
+
+                <textarea
+                  [id]="'response-' + claim.id"
+                  [name]="'response-' + claim.id"
+                  [(ngModel)]="ownerResponses[claim.id]"
+                  rows="3"
+                  maxlength="1000"
+                  placeholder="Enter a message for the claimant..."
+                ></textarea>
+
+                <div class="review-actions">
+
+                  <button
+                    type="button"
+                    class="reject-button"
+                    [disabled]="reviewingClaimId === claim.id"
+                    (click)="reviewClaim(claim, 'rejected')"
+                  >
+                    {{ reviewingClaimId === claim.id
+                      ? 'Processing...'
+                      : '✕ Reject Claim' }}
+                  </button>
+
+                  <button
+                    type="button"
+                    class="approve-button"
+                    [disabled]="reviewingClaimId === claim.id"
+                    (click)="reviewClaim(claim, 'approved')"
+                  >
+                    {{ reviewingClaimId === claim.id
+                      ? 'Processing...'
+                      : '✓ Approve Claim' }}
+                  </button>
+
+                </div>
+
+              </div>
+
+            }
+
+            <!-- Footer -->
+            <div class="claim-card-footer">
+
+              <span>
+                Last updated:
+                {{ claim.updated_at ? (claim.updated_at | date:'medium') : 'Not available' }}
+              </span>
+
+              <button
+                type="button"
+                class="view-item-button"
+                (click)="viewItem(claim.item_id)"
+              >
+                View Item →
+              </button>
+
+            </div>
+
+          </article>
+
+        }
+
+      </section>
+
+    }
+
+    <!-- Empty State -->
+    @else {
+
+      <div class="empty-claims">
+
+        <div class="empty-icon">📋</div>
+
+        <h2>No Claims Received</h2>
+
+        <p>
+          You haven't received any ownership claims for your found items yet.
+          New claims will appear here.
+        </p>
+
+        <button class="primary-button" (click)="goBack()">
+          Return to Dashboard
+        </button>
+
+      </div>
+
+    }
+
+  </main>
+
+</div>

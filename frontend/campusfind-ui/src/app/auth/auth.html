@@ -1,0 +1,91 @@
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="brand-icon">C</div>
+
+    <h1>CampusFind<span>AI</span></h1>
+    <p class="subtitle">Your campus community, connected.</p>
+
+    <div class="auth-heading">
+      <h2>{{ isRegister() ? 'Create your account' : 'Welcome back!' }}</h2>
+      <p>
+        {{ isRegister()
+          ? 'Join your campus lost and found community.'
+          : 'Sign in to continue to your dashboard.' }}
+      </p>
+    </div>
+
+    <form (ngSubmit)="submit()">
+
+      @if (isRegister()) {
+        <label>Full name</label>
+        <input
+          type="text"
+          name="name"
+          [(ngModel)]="name"
+          placeholder="Enter your full name"
+          required
+        />
+      }
+
+      <label>Email address</label>
+      <input
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        placeholder="student@example.com"
+        required
+      />
+
+      <label>Password</label>
+      <input
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        placeholder="Enter your password"
+        required
+      />
+
+      @if (isRegister()) {
+        <label>Confirm password</label>
+        <input
+          type="password"
+          name="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          placeholder="Confirm your password"
+          required
+        />
+      }
+
+      @if (errorMessage()) {
+        <div class="message error">{{ errorMessage() }}</div>
+      }
+
+      @if (successMessage()) {
+        <div class="message success">{{ successMessage() }}</div>
+      }
+
+      <button type="submit" [disabled]="loading()">
+        {{
+          loading()
+            ? 'Please wait...'
+            : isRegister()
+              ? 'Create account'
+              : 'Sign in'
+        }}
+      </button>
+
+    </form>
+
+    <div class="switch-auth">
+      {{ isRegister() ? 'Already have an account?' : "Don't have an account?" }}
+      <button type="button" (click)="toggleMode()">
+        {{ isRegister() ? 'Sign in' : 'Register' }}
+      </button>
+    </div>
+
+    <p class="auth-footer">© 2026 CampusFind AI</p>
+
+  </div>
+</div>

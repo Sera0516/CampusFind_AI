@@ -1,0 +1,329 @@
+
+<div class="details-page">
+
+  <!-- Header -->
+  <header class="details-header">
+    <button class="back-button" (click)="goBack()">
+      ← Back to Dashboard
+    </button>
+
+    <div class="header-brand">
+      <span class="brand-icon">C</span>
+      <span>CampusFind <strong>AI</strong></span>
+    </div>
+  </header>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="state-card">
+      <div class="loader"></div>
+      <p>Loading item details...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @else if (errorMessage) {
+    <div class="state-card error-state">
+      <h2>Unable to load report</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="primary-button" (click)="goBack()">
+        Return to Dashboard
+      </button>
+    </div>
+  }
+
+  <!-- Item Details -->
+  @else if (item) {
+
+    <main class="details-container">
+
+      <div class="page-heading">
+        <p class="eyebrow">ITEM INFORMATION</p>
+        <h1>Report Details</h1>
+        <p>View complete information about this lost or found item.</p>
+      </div>
+
+      <section class="item-details-card">
+
+        <!-- Item Image -->
+        <div class="item-image-section">
+          @if (item.image_url) {
+            <img
+              [src]="getImageUrl(item.image_url)"
+              [alt]="item.title"
+              class="item-main-image"
+            />
+          } @else {
+            <div class="image-placeholder">
+              <span>📦</span>
+              <p>No image available</p>
+            </div>
+          }
+        </div>
+
+        <!-- Item Information -->
+        <div class="item-information">
+
+          <div class="details-badges">
+            <span
+              class="type-badge"
+              [class.lost-badge]="item.item_type === 'lost'"
+              [class.found-badge]="item.item_type === 'found'"
+            >
+              {{ item.item_type | uppercase }}
+            </span>
+
+            <span class="category-badge">
+              {{ item.category }}
+            </span>
+          </div>
+
+          <h2>{{ item.title }}</h2>
+
+          <p class="item-description">
+            {{ item.description }}
+          </p>
+
+          <div class="information-list">
+
+            <div class="information-row">
+              <span class="info-icon">📍</span>
+              <div>
+                <small>Location</small>
+                <strong>{{ item.location }}</strong>
+              </div>
+            </div>
+
+            <div class="information-row">
+              <span class="info-icon">📅</span>
+              <div>
+                <small>Event Date</small>
+                <strong>{{ item.event_date | date:'mediumDate' }}</strong>
+              </div>
+            </div>
+
+            <div class="information-row">
+              <span class="info-icon">🆔</span>
+              <div>
+                <small>Report ID</small>
+                <strong>#{{ item.id }}</strong>
+              </div>
+            </div>
+
+            @if (item.created_at) {
+              <div class="information-row">
+                <span class="info-icon">🕒</span>
+                <div>
+                  <small>Reported On</small>
+                  <strong>{{ item.created_at | date:'medium' }}</strong>
+                </div>
+              </div>
+            }
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Claim This Item -->
+      @if (item.item_type === 'found') {
+        <section class="claim-section">
+
+          <div class="claim-heading">
+            <p class="eyebrow">ITEM RECOVERY</p>
+            <h2>Is this your item?</h2>
+            <p>
+              Submit a claim with details that can help the item owner
+              verify your ownership.
+            </p>
+          </div>
+
+          <!-- Claim Success -->
+          @if (claimSuccess) {
+            <div class="claim-message success-message">
+              {{ claimSuccess }}
+            </div>
+          }
+
+          <!-- Claim Error -->
+          @if (claimError) {
+            <div class="claim-message error-message">
+              {{ claimError }}
+            </div>
+          }
+
+          <!-- Open Claim Form -->
+          @if (!showClaimForm) {
+            <button
+              class="primary-button"
+              type="button"
+              (click)="openClaimForm()"
+            >
+              Claim This Item
+            </button>
+          }
+
+          <!-- Claim Form -->
+          @if (showClaimForm) {
+            <form
+              class="claim-form"
+              (ngSubmit)="submitClaim()"
+              #claimForm="ngForm"
+            >
+
+              <label for="claimMessage">
+                Explain why you believe this item belongs to you
+              </label>
+
+              <textarea
+                id="claimMessage"
+                name="claimMessage"
+                [(ngModel)]="claimMessage"
+                required
+                minlength="10"
+                maxlength="1000"
+                rows="5"
+                placeholder="Describe identifying features, stickers, contents, or other details that can help verify ownership..."
+              ></textarea>
+
+              <small>
+                Minimum 10 characters. Do not include sensitive personal
+                information.
+              </small>
+
+              <div class="claim-actions">
+
+                <button
+                  type="button"
+                  class="secondary-button"
+                  (click)="cancelClaim()"
+                  [disabled]="submittingClaim"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  class="primary-button"
+                  [disabled]="submittingClaim || claimForm.invalid"
+                >
+                  {{ submittingClaim ? 'Submitting...' : 'Submit Claim' }}
+                </button>
+
+              </div>
+
+            </form>
+          }
+
+        </section>
+      }
+
+      <!-- AI Semantic Matches -->
+      <section class="matches-section">
+
+        <div class="matches-heading">
+          <div>
+            <p class="eyebrow">INTELLIGENT SEARCH</p>
+            <h2>AI Potential Matches</h2>
+            <p>
+              Similar reports identified using AI semantic matching.
+            </p>
+          </div>
+
+          <span class="ai-label">✦ AI Powered</span>
+        </div>
+
+        @if (matchingLoading) {
+          <div class="state-card">
+            <div class="loader"></div>
+            <p>Finding potential matches...</p>
+          </div>
+        }
+
+        @else if (matchingError) {
+          <div class="message-card error-state">
+            {{ matchingError }}
+          </div>
+        }
+
+        @else if (matches.length > 0) {
+
+          <div class="matches-grid">
+
+            @for (match of matches; track match.id) {
+
+              <article class="match-card">
+
+                @if (match.image_url) {
+                  <img
+                    [src]="getImageUrl(match.image_url)"
+                    [alt]="match.title"
+                    class="match-image"
+                  />
+                } @else {
+                  <div class="match-image-placeholder">
+                    📦
+                  </div>
+                }
+
+                <div class="match-content">
+
+                  <div class="match-card-heading">
+                    <span
+                      class="type-badge"
+                      [class.lost-badge]="match.item_type === 'lost'"
+                      [class.found-badge]="match.item_type === 'found'"
+                    >
+                      {{ match.item_type | uppercase }}
+                    </span>
+
+                    <span class="similarity-score">
+                      {{ match.similarity_score | number:'1.1-2' }}%
+                    </span>
+                  </div>
+
+                  <h3>{{ match.title }}</h3>
+
+                  <p>{{ match.description }}</p>
+
+                  <div class="match-location">
+                    📍 {{ match.location }}
+                  </div>
+
+                  <div class="similarity-note">
+                    Semantic similarity score
+                  </div>
+
+                </div>
+
+              </article>
+
+            }
+
+          </div>
+
+        }
+
+        @else {
+          <div class="no-matches">
+            <span>🔍</span>
+            <h3>No potential matches found</h3>
+            <p>
+              We couldn't find similar reports at the moment.
+              Check again when new reports are submitted.
+            </p>
+          </div>
+        }
+
+        <p class="verification-note">
+          Note: AI similarity scores indicate descriptive similarity,
+          not confirmed ownership. Please verify the item before returning it.
+        </p>
+
+      </section>
+
+    </main>
+
+  }
+
+</div>

@@ -1,0 +1,179 @@
+
+<div class="my-claims-page">
+
+  <!-- Header -->
+  <header class="claims-header">
+    <button class="back-button" (click)="goBack()">
+      ← Back to Dashboard
+    </button>
+
+    <div class="header-brand">
+      <span class="brand-icon">C</span>
+      <span>CampusFind <strong>AI</strong></span>
+    </div>
+  </header>
+
+  <main class="claims-container">
+
+    <!-- Page Heading -->
+    <div class="page-heading">
+      <p class="eyebrow">CLAIM MANAGEMENT</p>
+      <h1>My Claims</h1>
+      <p>
+        Track the claims you have submitted for found items.
+      </p>
+    </div>
+
+    <!-- Loading -->
+    @if (loading) {
+      <div class="state-card">
+        <div class="loader"></div>
+        <p>Loading your claims...</p>
+      </div>
+    }
+
+    <!-- Error -->
+    @else if (errorMessage) {
+      <div class="state-card error-state">
+        <h2>Unable to load claims</h2>
+        <p>{{ errorMessage }}</p>
+
+        <button class="primary-button" (click)="loadMyClaims()">
+          Try Again
+        </button>
+      </div>
+    }
+
+    <!-- Claims List -->
+    @else if (claims.length > 0) {
+
+      <div class="claims-summary">
+        <div class="summary-card">
+          <span>Total Claims</span>
+          <strong>{{ claims.length }}</strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Pending</span>
+          <strong>
+            {{ claims.filter(c => c.status === 'pending').length }}
+          </strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Approved</span>
+          <strong>
+            {{ claims.filter(c => c.status === 'approved').length }}
+          </strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Rejected</span>
+          <strong>
+            {{ claims.filter(c => c.status === 'rejected').length }}
+          </strong>
+        </div>
+      </div>
+
+      <section class="claims-list">
+
+        @for (claim of claims; track claim.id) {
+
+          <article
+             class="claim-card"
+             [id]="'claim-' + claim.id"
+            [class.selected-claim]="selectedClaimId === claim.id"
+          >
+
+            <div class="claim-card-header">
+
+              <div>
+                <p class="claim-reference">
+                  CLAIM #{{ claim.id }}
+                </p>
+
+                <h2>
+                  {{ claim.item?.title || 'Loading item details...' }}
+                </h2>
+              </div>
+
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(claim.status)"
+              >
+                {{ claim.status | titlecase }}
+              </span>
+
+            </div>
+
+            <div class="claim-item-information">
+
+              <div>
+                <small>Item Report ID</small>
+                <strong>#{{ claim.item_id }}</strong>
+              </div>
+
+              <div>
+                <small>Submitted On</small>
+                <strong>{{ claim.created_at | date:'medium' }}</strong>
+              </div>
+
+            </div>
+
+            <div class="claim-message-section">
+              <h3>Your Explanation</h3>
+              <p>{{ claim.message }}</p>
+            </div>
+
+            @if (claim.owner_response) {
+              <div class="owner-response">
+                <h3>Owner's Response</h3>
+                <p>{{ claim.owner_response }}</p>
+              </div>
+            }
+
+            <div class="claim-card-footer">
+              <span>
+                Last updated:
+                {{ claim.updated_at ? (claim.updated_at | date:'medium') : 'Not available' }}
+              </span>
+
+              <button
+                class="view-item-button"
+                (click)="viewItem(claim.item_id)"
+              >
+                View Item →
+              </button>
+            </div>
+
+          </article>
+
+        }
+
+      </section>
+
+    }
+
+    <!-- Empty State -->
+    @else {
+      <div class="empty-claims">
+
+        <div class="empty-icon">📋</div>
+
+        <h2>No Claims Yet</h2>
+
+        <p>
+          You haven't submitted any claims.
+          When you claim a found item, it will appear here.
+        </p>
+
+        <button class="primary-button" (click)="goBack()">
+          Explore Found Items
+        </button>
+
+      </div>
+    }
+
+  </main>
+
+</div>

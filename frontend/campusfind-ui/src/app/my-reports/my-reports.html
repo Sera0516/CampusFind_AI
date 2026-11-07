@@ -1,0 +1,373 @@
+<div class="my-reports-page">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">YOUR CAMPUS ACTIVITY</p>
+      <h1>My Reports</h1>
+      <p class="page-description">
+        Manage the lost and found items you've reported.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="refreshReports()"
+      [disabled]="loading()">
+      <span>↻</span> Refresh
+    </button>
+  </header>
+
+  <!-- Statistics -->
+  <section class="report-summary">
+
+    <div class="summary-card">
+      <span class="summary-icon purple">▤</span>
+      <div>
+        <p>Total Reports</p>
+        <h2>{{ reports().length }}</h2>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-icon orange">⌕</span>
+      <div>
+        <p>Lost Items</p>
+        <h2>{{ reports().filter(r => r.item_type === 'lost').length }}</h2>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-icon green">✦</span>
+      <div>
+        <p>Found Items</p>
+        <h2>{{ reports().filter(r => r.item_type === 'found').length }}</h2>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Success Message -->
+  @if (successMessage()) {
+    <div class="alert success-alert">
+      <span>✓</span>
+      {{ successMessage() }}
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (errorMessage()) {
+    <div class="alert error-alert">
+      <span>!</span>
+      {{ errorMessage() }}
+      <button type="button" (click)="refreshReports()">Try again</button>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="reports-state">
+      <div class="loading-spinner"></div>
+      <h3>Loading your reports...</h3>
+      <p>Please wait while we retrieve your reports.</p>
+    </div>
+  }
+
+  <!-- Reports -->
+  @if (!loading() && !errorMessage()) {
+
+    <section class="reports-section">
+
+      <div class="reports-heading">
+        <div>
+          <h2>Your submitted items</h2>
+          <p>All reports created using your student account.</p>
+        </div>
+
+        <span class="report-count">
+          {{ reports().length }} reports
+        </span>
+      </div>
+
+      <div class="reports-grid">
+
+        @for (report of reports(); track report.id) {
+
+          <article class="report-card">
+
+            <!-- Image -->
+            <div class="report-image">
+              <img
+                [src]="getImageUrl(report.image_url)"
+                [alt]="report.title"
+                loading="lazy">
+
+              <span
+                class="report-type"
+                [class.lost-type]="report.item_type === 'lost'"
+                [class.found-type]="report.item_type === 'found'">
+                {{ getReportType(report.item_type) }}
+              </span>
+            </div>
+
+            <!-- Details -->
+            <div class="report-details">
+
+              <div class="report-meta">
+                <span class="category-label">{{ report.category }}</span>
+                <span class="report-id">#{{ report.id }}</span>
+              </div>
+
+              <h3>{{ report.title }}</h3>
+
+              <p class="report-description">
+                {{ report.description }}
+              </p>
+
+              <div class="report-information">
+                <div>
+                  <span class="info-icon">⌖</span>
+                  <span>{{ report.location }}</span>
+                </div>
+
+                <div>
+                  <span class="info-icon">▦</span>
+                  <span>{{ report.event_date | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="report-card-actions">
+
+                <button
+                  type="button"
+                  class="edit-button"
+                  [disabled]="saving() || deletingId() === report.id"
+                  (click)="openEditForm(report)">
+                  ✎ Edit Report
+                </button>
+
+                <button
+                  type="button"
+                  class="delete-button"
+                  [disabled]="deletingId() === report.id || saving()"
+                  (click)="deleteReport(report)">
+
+                  @if (deletingId() === report.id) {
+                    Deleting...
+                  } @else {
+                    <span>⌫</span> Delete Report
+                  }
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        } @empty {
+
+          <div class="empty-reports">
+            <div class="empty-icon">▤</div>
+            <h3>You haven't submitted any reports yet</h3>
+            <p>
+              When you report a lost or found item, it will appear here.
+            </p>
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+  <!-- EDIT REPORT MODAL -->
+  @if (showEditForm()) {
+
+    <div
+      class="edit-modal-overlay"
+      (click)="closeEditForm()">
+
+      <div
+        class="edit-modal"
+        (click)="$event.stopPropagation()">
+
+        <div class="edit-modal-header">
+          <div>
+            <p class="eyebrow">MANAGE YOUR REPORT</p>
+            <h2>Edit Report</h2>
+            <p>Update the information about your item.</p>
+          </div>
+
+          <button
+            type="button"
+            class="modal-close"
+            (click)="closeEditForm()"
+            [disabled]="saving()">
+            ×
+          </button>
+        </div>
+
+        <!-- Lost / Found -->
+        <div class="edit-form-group">
+          <label>Report Type *</label>
+
+          <div class="edit-type-options">
+            <button
+              type="button"
+              [class.active]="editType() === 'lost'"
+              (click)="editType.set('lost')">
+              ⌕ Lost Item
+            </button>
+
+            <button
+              type="button"
+              [class.active]="editType() === 'found'"
+              (click)="editType.set('found')">
+              ✦ Found Item
+            </button>
+          </div>
+        </div>
+
+        <!-- Item Name -->
+        <div class="edit-form-group">
+          <label for="edit-title">Item Name *</label>
+          <input
+            id="edit-title"
+            type="text"
+            [value]="editTitle()"
+            (input)="editTitle.set($any($event.target).value)"
+            maxlength="120"
+            placeholder="Enter item name">
+        </div>
+
+        <!-- Category -->
+        <div class="edit-form-group">
+          <label for="edit-category">Category *</label>
+
+          <select
+            id="edit-category"
+            [value]="editCategory()"
+            (change)="editCategory.set($any($event.target).value)">
+
+            @for (category of reportCategories; track category) {
+              <option [value]="category">{{ category }}</option>
+            }
+
+          </select>
+        </div>
+
+        <!-- Location -->
+        <div class="edit-form-group">
+          <label for="edit-location">Location *</label>
+          <input
+            id="edit-location"
+            type="text"
+            [value]="editLocation()"
+            (input)="editLocation.set($any($event.target).value)"
+            maxlength="200"
+            placeholder="Enter location">
+        </div>
+
+        <!-- Date -->
+        <div class="edit-form-group">
+          <label for="edit-date">Date *</label>
+          <input
+            id="edit-date"
+            type="date"
+            [value]="editDate()"
+            (input)="editDate.set($any($event.target).value)">
+        </div>
+
+        <!-- Description -->
+        <div class="edit-form-group">
+          <label for="edit-description">Description *</label>
+          <textarea
+            id="edit-description"
+            rows="4"
+            [value]="editDescription()"
+            (input)="editDescription.set($any($event.target).value)"
+            maxlength="2000"
+            placeholder="Describe the item..."></textarea>
+        </div>
+
+        <!-- Existing / New Image -->
+        <div class="edit-form-group">
+          <label>Item Image</label>
+
+          <div class="edit-image-preview">
+            <img
+              [src]="editImagePreview() || 'https://placehold.co/600x400?text=No+Image'"
+              alt="Item image preview">
+          </div>
+
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            (change)="onEditFileSelected($event)">
+
+          @if (editSelectedFile()) {
+            <p class="selected-file">
+              Selected: {{ editSelectedFile()?.name }}
+            </p>
+          }
+
+          <p class="edit-help-text">
+            Leave the image unchanged if you don't want to replace it.
+            Maximum size: 5 MB.
+          </p>
+        </div>
+
+        <!-- Edit Errors -->
+        @if (editError()) {
+          <div class="alert error-alert">
+            {{ editError() }}
+          </div>
+        }
+
+        <!-- Edit Success -->
+        @if (editSuccess()) {
+          <div class="alert success-alert">
+            ✓ {{ editSuccess() }}
+          </div>
+        }
+
+        <!-- Modal Actions -->
+        <div class="edit-modal-actions">
+
+          <button
+            type="button"
+            class="cancel-edit-button"
+            [disabled]="saving()"
+            (click)="closeEditForm()">
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            class="save-edit-button"
+            [disabled]="saving()"
+            (click)="saveEditedReport()">
+
+            @if (saving()) {
+              Saving...
+            } @else {
+              Save Changes →
+            }
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

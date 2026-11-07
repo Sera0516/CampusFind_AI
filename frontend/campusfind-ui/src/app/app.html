@@ -1,0 +1,782 @@
+
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">C</div>
+      <div class="brand-text">
+        <h2>CampusFind<span>AI</span></h2>
+        <p>CAMPUS COMMUNITY</p>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-label">WORKSPACE</p>
+
+      <button class="nav-item active">
+        <span class="nav-icon">⌂</span>
+        Dashboard
+      </button>
+
+      <button class="nav-item" (click)="setType('Lost')">
+        <span class="nav-icon">⌕</span>
+        Lost Items
+      </button>
+
+      <button class="nav-item" (click)="setType('Found')">
+        <span class="nav-icon">✦</span>
+        Found Items
+      </button>
+
+      <button class="nav-item" (click)="setType('All')">
+        <span class="nav-icon">▤</span>
+        All Reports
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-label">YOUR ACCOUNT</p>
+
+      <button class="nav-item" (click)="reportItem('Lost')">
+        <span class="nav-icon">＋</span>
+        Report an Item
+      </button>
+
+      <button
+        class="nav-item"
+        routerLink="/my-reports"
+        routerLinkActive="active">
+        <span class="nav-icon">▤</span>
+        My Reports
+      </button>
+      <button
+         class="nav-item"
+         routerLink="/my-claims"
+         routerLinkActive="active">
+         <span class="nav-icon">✓</span>
+          My Claims
+      </button>
+      <button
+         class="nav-item"
+         routerLink="/received-claims"
+         routerLinkActive="active">
+         <span class="nav-icon">✉</span>
+         Received Claims
+      </button>
+
+      <button class="nav-item">
+        <span class="nav-icon">♡</span>
+        My Saved Items
+      </button>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="help-card">
+        <div class="help-icon">✦</div>
+        <h3>Need some help?</h3>
+        <p>Our campus community is here to help you find what matters.</p>
+        <button class="help-button">Get support →</button>
+      </div>
+
+      <div class="profile">
+        <div class="avatar">S</div>
+        <div class="profile-info">
+          <strong>Campus Student</strong>
+          <span>Student Account</span>
+        </div>
+        <span class="profile-menu">•••</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Top Navigation -->
+    <header class="topbar">
+      <div class="breadcrumb">
+        <span>Workspace</span>
+        <span class="breadcrumb-divider">/</span>
+        <strong>Dashboard</strong>
+      </div>
+
+      <div class="topbar-actions">
+        <span class="system-status">
+          <span class="status-dot"></span>
+          Campus community
+        </span>
+        
+<!-- Notification Centre -->
+<div class="notification-wrapper">
+
+  <!-- Notification Bell -->
+  <button
+    type="button"
+    class="notification-button"
+    aria-label="Notifications"
+    [attr.aria-expanded]="showNotifications()"
+    (click)="toggleNotifications()">
+
+    ♧
+
+    @if (unreadNotificationCount() > 0) {
+      <span class="notification-badge">
+        {{ unreadNotificationCount() > 99 ? '99+' : unreadNotificationCount() }}
+      </span>
+    }
+
+  </button>
+
+  <!-- Notification Dropdown -->
+  @if (showNotifications()) {
+
+    <div class="notification-dropdown">
+
+      <!-- Dropdown Header -->
+      <div class="notification-header">
+
+        <div>
+          <h3>Notifications</h3>
+          <span>
+            {{ unreadNotificationCount() }} unread
+          </span>
+        </div>
+
+        @if (unreadNotificationCount() > 0) {
+          <button
+            type="button"
+            class="mark-all-button"
+            (click)="markAllNotificationsAsRead()">
+            Mark all as read
+          </button>
+        }
+
+      </div>
+
+      <!-- Loading -->
+      @if (notificationLoading()) {
+        <div class="notification-empty">
+          Loading notifications...
+        </div>
+      }
+
+      <!-- Error -->
+      @if (notificationError()) {
+        <div class="notification-empty notification-error">
+          {{ notificationError() }}
+
+          <button
+            type="button"
+            (click)="loadNotifications()">
+            Retry
+          </button>
+        </div>
+      }
+
+      <!-- Notification List -->
+      @if (!notificationLoading() && !notificationError()) {
+
+        <div class="notification-list">
+
+          @for (notification of notifications(); track notification.id) {
+
+            <button
+              type="button"
+              class="notification-item"
+              [class.unread]="!notification.is_read"
+              (click)="markNotificationAsRead(notification)">
+
+              <div class="notification-item-icon">
+                @if (notification.notification_type === 'new_claim') {
+                  ✉
+                } @else if (notification.notification_type === 'claim_approved') {
+                  ✓
+                } @else if (notification.notification_type === 'claim_rejected') {
+                  !
+                } @else {
+                  ♧
+                }
+              </div>
+
+              <div class="notification-item-content">
+
+                <div class="notification-item-title">
+                  <strong>{{ notification.title }}</strong>
+
+                  @if (!notification.is_read) {
+                    <span class="unread-dot"></span>
+                  }
+                </div>
+
+                <p>{{ notification.message }}</p>
+
+                <span class="notification-time">
+                  {{ notification.created_at | date:'dd MMM yyyy, hh:mm a' }}
+                </span>
+
+              </div>
+
+            </button>
+
+          } @empty {
+
+            <div class="notification-empty">
+              <span>♧</span>
+              <strong>No notifications yet</strong>
+              <p>You're all caught up!</p>
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</div>
+
+        <div class="top-avatar">S</div>
+      </div>
+    </header>
+
+    <!-- Dashboard -->
+    <section class="dashboard">
+
+      <!-- Welcome -->
+      <div class="welcome-section">
+        <div>
+          <p class="eyebrow">CAMPUS LOST & FOUND PLATFORM</p>
+          <h1>Find what's <span>missing.</span></h1>
+          <p class="welcome-description">
+            Lost something on campus? Found something that belongs to someone?
+            Let's bring things back together.
+          </p>
+        </div>
+
+        <div class="welcome-decoration">
+          <div class="decoration-circle">✦</div>
+          <div class="decoration-small">CAMPUS<br>CONNECT</div>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">Total Reports</span>
+            <span class="stat-icon purple">▤</span>
+          </div>
+          <h2>{{ items().length }}</h2>
+          <p>Items reported on campus</p>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">Lost Items</span>
+            <span class="stat-icon orange">⌕</span>
+          </div>
+          <h2>{{ lostCount }}</h2>
+          <p>Waiting to be reunited</p>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">Found Items</span>
+            <span class="stat-icon green">✓</span>
+          </div>
+          <h2>{{ foundCount }}</h2>
+          <p>Reported by students</p>
+        </div>
+
+        <div class="stat-card highlight-card">
+          <div class="stat-top">
+            <span class="stat-label">AI Assistance</span>
+            <span class="stat-icon blue">✧</span>
+          </div>
+          <h2>Smart Match</h2>
+          <p>AI-powered semantic matching is active</p>
+        </div>
+
+      </div>
+
+      <!-- Report Actions -->
+      <div class="report-banner">
+        <div class="report-banner-text">
+          <span class="banner-eyebrow">BE A PART OF THE SOLUTION</span>
+          <h2>Every lost item has a way home.</h2>
+          <p>Help your campus community by sharing a lost or found report.</p>
+        </div>
+
+        <div class="report-actions">
+          <button
+            class="report-button lost-button"
+            (click)="reportItem('Lost')">
+            <span>＋</span> Report Lost
+          </button>
+
+          <button
+            class="report-button found-button"
+            (click)="reportItem('Found')">
+            <span>＋</span> Report Found
+          </button>
+        </div>
+      </div>
+
+      <!-- Items Section -->
+      <section class="items-section">
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">EXPLORE YOUR CAMPUS</p>
+            <h2>Recent reports</h2>
+            <p class="section-subtitle">
+              Browse items recently reported by your campus community.
+            </p>
+          </div>
+
+          <span class="result-count">
+            {{ filteredItems().length }} results
+          </span>
+        </div>
+
+        <!-- Search -->
+        <div class="search-area">
+          <div class="search-box">
+            <span class="search-icon">⌕</span>
+            <input
+              type="text"
+              placeholder="Search items, locations or descriptions..."
+              [value]="searchTerm()"
+              (input)="onSearch($event)">
+          </div>
+
+          <select
+            class="type-select"
+            [value]="selectedType()"
+            (change)="setType($any($event.target).value)">
+            <option value="All">All reports</option>
+            <option value="Lost">Lost items</option>
+            <option value="Found">Found items</option>
+          </select>
+        </div>
+
+        <!-- Category Filters -->
+        <div class="category-filters">
+          @for (category of categories; track category) {
+            <button
+              class="category-chip"
+              [class.selected]="selectedCategory() === category"
+              (click)="setCategory(category)">
+              {{ category }}
+            </button>
+          }
+        </div>
+
+        <!-- Loading State -->
+        @if (loading()) {
+          <div class="empty-state">
+            <h3>Loading reports...</h3>
+            <p>Please wait while we retrieve campus reports.</p>
+          </div>
+        }
+
+        <!-- API Error -->
+        @if (errorMessage()) {
+          <div class="form-message error">
+            {{ errorMessage() }}
+            <button type="button" (click)="loadItems()">Retry</button>
+          </div>
+        }
+
+        <!-- Item Cards -->
+        @if (!loading()) {
+          <div class="items-grid">
+
+            @for (item of filteredItems(); track item.id) {
+
+              <article class="item-card">
+
+                <div class="item-image">
+                  <img
+                    [src]="item.image"
+                    [alt]="item.title"
+                    loading="lazy">
+
+                  <span
+                    class="item-type-badge"
+                    [class.lost-badge]="item.type === 'Lost'"
+                    [class.found-badge]="item.type === 'Found'">
+                    {{ item.type }}
+                  </span>
+
+                  <button class="save-button" aria-label="Save item">♡</button>
+                </div>
+
+                <div class="item-details">
+
+                  <div class="item-category">
+                    {{ item.category }}
+                    <span>•</span>
+                    {{ item.date }}
+                  </div>
+
+                  <h3>{{ item.title }}</h3>
+
+                  <p class="item-description">
+                    {{ item.description }}
+                  </p>
+
+                  <div class="item-location">
+                    <span>⌖</span>
+                    {{ item.location }}
+                  </div>
+
+                  <div class="item-footer">
+                    <span class="item-status">{{ item.status }}</span>
+                    <button
+                      type="button"
+                      class="view-button"
+                      (click)="router.navigate(['/item', item.id])">
+                      View details →
+                    </button>
+                  </div>
+
+                  <!-- AI Semantic Matching -->
+                  <div class="ai-match-section">
+
+                    <button
+                      type="button"
+                      class="ai-match-button"
+                      [disabled]="matchingLoading() && selectedMatchItemId() === item.id"
+                      (click)="toggleSemanticMatches(item.id)">
+
+                      <span>✧</span>
+
+                      @if (selectedMatchItemId() === item.id) {
+                        Hide AI Matches
+                      } @else {
+                        Find AI Matches
+                      }
+
+                      <span>→</span>
+                    </button>
+
+                    @if (selectedMatchItemId() === item.id) {
+
+                      <div class="ai-match-results">
+
+                        @if (matchingLoading()) {
+                          <p class="ai-match-loading">
+                            ✧ Analysing reports and finding potential matches...
+                          </p>
+                        }
+
+                        @if (matchingError()) {
+                          <p class="ai-match-error">
+                            {{ matchingError() }}
+                          </p>
+                        }
+
+                        @if (semanticMatchResults(); as result) {
+
+                          <div class="ai-match-heading">
+                            <strong>Potential AI Matches</strong>
+                            <span>{{ result.total_matches }} found</span>
+                          </div>
+
+                          @if (result.matches.length > 0) {
+
+                            @for (match of result.matches; track match.id) {
+
+                              <div class="ai-match-card">
+
+                                <div class="ai-match-card-top">
+                                  <strong>{{ match.title }}</strong>
+
+                                  <span class="similarity-score">
+                                    {{ match.similarity_score }}%
+                                  </span>
+                                </div>
+
+                                <span
+                                  class="ai-match-type"
+                                  [class.lost-badge]="match.item_type === 'lost'"
+                                  [class.found-badge]="match.item_type === 'found'">
+                                  {{ match.item_type | uppercase }}
+                                </span>
+
+                                <p>{{ match.description }}</p>
+
+                                <div class="ai-match-location">
+                                  ⌖ {{ match.location }}
+                                </div>
+
+                                <div class="similarity-label">
+                                  Semantic similarity score
+                                </div>
+
+                              </div>
+
+                            }
+
+                          } @else {
+
+                            <div class="no-ai-matches">
+                              <span>⌕</span>
+                              <strong>No potential matches found</strong>
+                              <p>We'll keep checking as new reports are submitted.</p>
+                            </div>
+
+                          }
+
+                        }
+
+                      </div>
+
+                    }
+
+                  </div>
+
+                </div>
+              </article>
+
+            } @empty {
+
+              <div class="empty-state">
+                <div class="empty-icon">⌕</div>
+                <h3>No matching items found</h3>
+                <p>Try changing your search or selecting another category.</p>
+
+                <button
+                  class="clear-filters"
+                  (click)="searchTerm.set(''); setCategory('All'); setType('All')">
+                  Clear filters
+                </button>
+              </div>
+
+            }
+
+          </div>
+        }
+
+      </section>
+
+      <!-- Footer -->
+      <footer class="dashboard-footer">
+        <span>© 2026 CampusFind AI</span>
+        <span>
+          Built for campus communities
+          <span class="footer-heart">♥</span>
+        </span>
+      </footer>
+
+    </section>
+
+  </main>
+
+  <!-- Report Item Modal -->
+  @if (showReportForm()) {
+
+    <div
+      class="modal-overlay"
+      (click)="closeReportForm()">
+
+      <div
+        class="report-modal"
+        (click)="$event.stopPropagation()">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">CAMPUS COMMUNITY</p>
+            <h2>Report {{ reportType() }} Item</h2>
+            <p class="modal-subtitle">
+              Help reunite missing belongings with their owners.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="modal-close"
+            (click)="closeReportForm()"
+            aria-label="Close form">
+            ×
+          </button>
+        </div>
+
+        <!-- Lost / Found Selection -->
+        <div class="report-type-selection">
+
+          <button
+            type="button"
+            [class.active]="reportType() === 'Lost'"
+            (click)="reportType.set('Lost')">
+            ⌕ I Lost Something
+          </button>
+
+          <button
+            type="button"
+            [class.active]="reportType() === 'Found'"
+            (click)="reportType.set('Found')">
+            ✦ I Found Something
+          </button>
+
+        </div>
+
+        <!-- Form Fields -->
+        <div class="report-form">
+
+          <div class="form-group">
+            <label>Item Name *</label>
+
+            <input
+              type="text"
+              placeholder="e.g. Black Dell Laptop"
+              [value]="reportTitle()"
+              (input)="reportTitle.set($any($event.target).value)"
+              maxlength="120">
+          </div>
+
+          <div class="form-row">
+
+            <div class="form-group">
+              <label>Category *</label>
+
+              <select
+                [value]="reportCategory()"
+                (change)="reportCategory.set($any($event.target).value)">
+
+                @for (category of reportCategories; track category) {
+                  <option [value]="category">
+                    {{ category }}
+                  </option>
+                }
+
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Date *</label>
+
+              <input
+                type="date"
+                [value]="reportDate()"
+                (input)="reportDate.set($any($event.target).value)">
+            </div>
+
+          </div>
+
+          <div class="form-group">
+            <label>Location *</label>
+
+            <input
+              type="text"
+              placeholder="e.g. Central Library"
+              [value]="reportLocation()"
+              (input)="reportLocation.set($any($event.target).value)"
+              maxlength="200">
+          </div>
+
+          <div class="form-group">
+            <label>Description *</label>
+
+            <textarea
+              rows="4"
+              placeholder="Describe the item, its colour, brand, identifying marks and other details..."
+              [value]="reportDescription()"
+              (input)="reportDescription.set($any($event.target).value)"
+              maxlength="2000"></textarea>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="form-group">
+            <label>Upload Item Image</label>
+
+            <label class="image-upload-area">
+
+              @if (imagePreview()) {
+
+                <img
+                  [src]="imagePreview()"
+                  alt="Selected item preview"
+                  class="image-preview">
+
+              } @else {
+
+                <span class="upload-icon">＋</span>
+                <strong>Click to upload an image</strong>
+                <span>PNG, JPG or JPEG · Maximum 5 MB</span>
+
+              }
+
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                (change)="onFileSelected($event)"
+                hidden>
+
+            </label>
+
+            @if (selectedFile()) {
+              <p class="selected-file">
+                Selected: {{ selectedFile()?.name }}
+              </p>
+            }
+
+          </div>
+
+          <!-- Error Message -->
+          @if (formError()) {
+            <div class="form-message error">
+              {{ formError() }}
+            </div>
+          }
+
+          <!-- Success Message -->
+          @if (formSuccess()) {
+            <div class="form-message success">
+              ✓ {{ formSuccess() }}
+            </div>
+          }
+
+          <!-- Submit Actions -->
+          <div class="modal-actions">
+
+            <button
+              type="button"
+              class="cancel-button"
+              [disabled]="formSubmitting()"
+              (click)="closeReportForm()">
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="submit-report-button"
+              [disabled]="formSubmitting()"
+              (click)="submitReport()">
+
+              @if (formSubmitting()) {
+                Submitting...
+              } @else {
+                Submit Report →
+              }
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

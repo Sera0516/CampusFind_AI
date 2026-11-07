@@ -1,0 +1,157 @@
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 16px;
+  background: linear-gradient(135deg, #f3f0ff, #f8fafc);
+  font-family: Arial, sans-serif;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 40px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 15px 50px rgba(30, 30, 60, 0.08);
+}
+
+.brand-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #6848d9;
+  color: white;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+h1 {
+  text-align: center;
+  font-size: 27px;
+  margin: 0;
+  color: #25213a;
+}
+
+h1 span {
+  color: #7957df;
+}
+
+.subtitle {
+  text-align: center;
+  color: #858397;
+  font-size: 13px;
+  margin-bottom: 35px;
+}
+
+.auth-heading h2 {
+  font-size: 23px;
+  color: #29263b;
+  margin-bottom: 7px;
+}
+
+.auth-heading p {
+  font-size: 13px;
+  color: #858397;
+  margin-bottom: 25px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #454257;
+  margin: 16px 0 8px;
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #e3e1ed;
+  border-radius: 9px;
+  outline: none;
+  font-size: 14px;
+}
+
+input:focus {
+  border-color: #7957df;
+  box-shadow: 0 0 0 3px rgba(121, 87, 223, 0.1);
+}
+
+form > button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 24px;
+  border: none;
+  border-radius: 9px;
+  background: #6848d9;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+form > button:hover {
+  background: #5535c4;
+}
+
+form > button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.message {
+  padding: 11px;
+  margin-top: 15px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.error {
+  background: #fff0f0;
+  color: #c03939;
+}
+
+.success {
+  background: #eaf8ef;
+  color: #267544;
+}
+
+.switch-auth {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 13px;
+  color: #777487;
+}
+
+.switch-auth button {
+  border: none;
+  background: none;
+  color: #6848d9;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 11px;
+  color: #aaa7b7;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 22px;
+  }
+}
