@@ -1,4 +1,5 @@
 
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -10,11 +11,9 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.claims import router as claims_router
 from app.api.notifications import router as notifications_router
-
 from app.db.session import engine
 from app.db.base import Base
 from app import models
-
 from app.api.items import router as items_router
 from app.api.auth import router as auth_router
 
@@ -26,7 +25,6 @@ security = HTTPBearer()
 UPLOAD_DIR = Path(__file__).resolve().parents[1] / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-
 app = FastAPI(
     title="CampusFind AI",
     description="Intelligent Campus Lost and Found Platform",
@@ -34,19 +32,25 @@ app = FastAPI(
     swagger_ui_parameters={"persistAuthorization": True}
 )
 
-
 # CORS Configuration
+cors_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:4200,http://127.0.0.1:4200"
+)
+
+allowed_origins = [
+    origin.strip()
+    for origin in cors_origins.split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:4200",
-        "http://127.0.0.1:4200"
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
 
 # Serve uploaded images
 app.mount(
@@ -54,7 +58,6 @@ app.mount(
     StaticFiles(directory=str(UPLOAD_DIR)),
     name="uploads"
 )
-
 
 # Register API routers
 app.include_router(items_router)
@@ -104,5 +107,5 @@ def database_health():
 
         raise HTTPException(
             status_code=503,
-            detail=str(exc)
+            detail="Database connection failed"
         )
