@@ -3,7 +3,6 @@ import os
 import math
 import httpx
 
-
 EMBEDDING_DIMENSION = 384
 MODEL_NAME = "@cf/baai/bge-small-en-v1.5"
 
@@ -44,9 +43,7 @@ def generate_embedding(
         "Content-Type": "application/json"
     }
 
-    payload = {
-        "text": [text]
-    }
+    payload = {"text": [text]}
 
     try:
         response = httpx.post(
@@ -55,28 +52,24 @@ def generate_embedding(
             json=payload,
             timeout=60.0
         )
-
         response.raise_for_status()
         result = response.json()
 
     except httpx.HTTPStatusError as exc:
         print("Cloudflare HTTP Status:", exc.response.status_code)
         print("Cloudflare Response:", exc.response.text)
-
         raise RuntimeError(
             "Cloudflare embedding request failed."
         ) from exc
 
     except httpx.RequestError as exc:
         print("Cloudflare Connection Error:", str(exc))
-
         raise RuntimeError(
             "Could not connect to Cloudflare."
         ) from exc
 
     if not result.get("success"):
         print("Cloudflare API Errors:", result.get("errors"))
-
         raise RuntimeError(
             "Cloudflare embedding generation failed."
         )
@@ -101,12 +94,8 @@ def generate_embedding(
     )
 
     if norm == 0:
-        raise ValueError(
-            "Cloudflare returned a zero vector."
-        )
+        raise ValueError("Cloudflare returned a zero vector.")
 
-    normalized_embedding = [
+    return [
         float(value) / norm for value in embedding
     ]
-
-    return normalized_embedding
