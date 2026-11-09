@@ -1,4 +1,4 @@
 ﻿export const environment = {
   production: true,
-  apiUrl: 'https://YOUR-BACKEND-DOMAIN'
+  apiUrl: 'https://campusfind-ai-t26h.onrender.com'
 };
