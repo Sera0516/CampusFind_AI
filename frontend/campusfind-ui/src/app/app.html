@@ -14,7 +14,11 @@
     <div class="sidebar-section">
       <p class="sidebar-label">WORKSPACE</p>
 
-      <button class="nav-item active">
+      <button
+        class="nav-item"
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
         <span class="nav-icon">⌂</span>
         Dashboard
       </button>
@@ -32,6 +36,13 @@
       <button class="nav-item" (click)="setType('All')">
         <span class="nav-icon">▤</span>
         All Reports
+      </button>
+      <button
+        class="nav-item"
+        routerLink="/assistant"
+        routerLinkActive="active">
+        <span class="nav-icon">✦</span>
+        Campus AI Assistant
       </button>
     </div>
 

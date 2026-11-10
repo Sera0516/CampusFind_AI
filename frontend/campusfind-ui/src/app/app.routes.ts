@@ -6,9 +6,10 @@ import { Dashboard } from './dashboard';
 import { MyReports } from './my-reports/my-reports';
 import { ItemDetails } from './item-details/item-details';
 import { MyClaims } from './my-claims/my-claims';
+import { ReceivedClaims } from './received-claims/received-claims';
+import { Assistant } from './assistant/assistant';
 
 import { authGuard } from './guards/auth.guard';
-import { ReceivedClaims } from './received-claims/received-claims';
 
 export const routes: Routes = [
 
@@ -39,6 +40,13 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
 
+  // Campus AI Assistant (RAG)
+  {
+    path: 'assistant',
+    component: Assistant,
+    canActivate: [authGuard]
+  },
+
   // My Reports
   {
     path: 'my-reports',
@@ -52,6 +60,7 @@ export const routes: Routes = [
     component: MyClaims,
     canActivate: [authGuard]
   },
+
   // Received Claims
   {
     path: 'received-claims',

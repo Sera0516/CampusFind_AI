@@ -298,7 +298,9 @@ markNotificationAsRead(notification: Notification): void {
           type: report.item_type === 'lost' ? 'Lost' : 'Found',
 
           image: report.image_url
-            ? `${environment.apiUrl}${report.image_url}`
+            ? (report.image_url.startsWith('http')
+              ? report.image_url
+              : `${environment.apiUrl}${report.image_url}`)
             : 'https://placehold.co/700x450?text=No+Image',
 
           status: report.item_type === 'lost'

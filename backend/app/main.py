@@ -9,13 +9,15 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.api.assistant import router as assistant_router
 from app.api.claims import router as claims_router
 from app.api.notifications import router as notifications_router
+from app.api.items import router as items_router
+from app.api.auth import router as auth_router
+
 from app.db.session import engine
 from app.db.base import Base
 from app import models
-from app.api.items import router as items_router
-from app.api.auth import router as auth_router
 
 
 # Enable JWT Bearer authentication in Swagger UI
@@ -64,6 +66,7 @@ app.include_router(items_router)
 app.include_router(auth_router)
 app.include_router(claims_router)
 app.include_router(notifications_router)
+app.include_router(assistant_router)
 
 
 # Create database tables

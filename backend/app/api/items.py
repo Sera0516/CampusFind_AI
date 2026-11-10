@@ -13,6 +13,8 @@ from fastapi import (
     Query
 )
 from sqlalchemy.orm import Session
+import logging
+logger = logging.getLogger(__name__)
 
 from PIL import Image, UnidentifiedImageError
 
@@ -20,7 +22,21 @@ from app.db.session import get_db
 from app.models.item import Item
 from app.models.user import User
 from app.schemas.item import ItemCreate, ItemUpdate, ItemResponse
+import asyncio
+import cloudinary
+import cloudinary.uploader
 
+from app.core.config import (
+    CLOUDINARY_CLOUD_NAME,
+    CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET
+)
+cloudinary.config(
+    cloud_name=CLOUDINARY_CLOUD_NAME,
+    api_key=CLOUDINARY_API_KEY,
+    api_secret=CLOUDINARY_API_SECRET,
+    secure=True
+)
 from app.services.item_service import (
     create_item,
     get_all_items,
@@ -182,6 +198,7 @@ def get_my_reports(
 # UPLOAD OR REPLACE IMAGE - Owner only
 # ==========================================
 
+
 @router.post("/{item_id}/image", response_model=ItemResponse)
 async def upload_item_image(
     item_id: int,
@@ -189,7 +206,7 @@ async def upload_item_image(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    destination = None
+    cloudinary_public_id = None
 
     try:
         item = get_item_by_id(db, item_id)
@@ -234,19 +251,31 @@ async def upload_item_image(
             file.content_type or ""
         )
 
+        # Upload image to Cloudinary without blocking the async event loop.
+        upload_result = await asyncio.to_thread(
+            cloudinary.uploader.upload,
+            BytesIO(contents),
+            folder="campusfind/items",
+            resource_type="image",
+            public_id=uuid4().hex,
+            overwrite=False
+        )
+
+        cloudinary_public_id = upload_result.get("public_id")
+        secure_url = upload_result.get("secure_url")
+
+        if not cloudinary_public_id or not secure_url:
+            raise RuntimeError("Cloudinary did not return a valid image URL")
+
+        # Store the permanent HTTPS URL in PostgreSQL.
         old_image_path = get_existing_upload_path(item.image_url)
-
-        filename = f"{uuid4().hex}{extension}"
-        destination = UPLOAD_DIR / filename
-
-        destination.write_bytes(contents)
-
-        item.image_url = f"/uploads/{filename}"
+        item.image_url = secure_url
 
         db.commit()
         db.refresh(item)
 
-        if old_image_path and old_image_path != destination:
+        # Remove an old local image only after the database commit succeeds.
+        if old_image_path:
             try:
                 old_image_path.unlink(missing_ok=True)
             except OSError:
@@ -255,15 +284,33 @@ async def upload_item_image(
         return item
 
     except HTTPException:
-        if destination and destination.exists():
-            destination.unlink(missing_ok=True)
+        db.rollback()
+
+        if cloudinary_public_id:
+            try:
+                await asyncio.to_thread(
+                    cloudinary.uploader.destroy,
+                    cloudinary_public_id,
+                    resource_type="image"
+                )
+            except Exception:
+                pass
+
         raise
 
     except Exception:
+        logger.exception("Cloudinary image upload failed")
         db.rollback()
 
-        if destination and destination.exists():
-            destination.unlink(missing_ok=True)
+        if cloudinary_public_id:
+            try:
+                await asyncio.to_thread(
+                    cloudinary.uploader.destroy,
+                    cloudinary_public_id,
+                    resource_type="image"
+                )
+            except Exception:
+                pass
 
         raise HTTPException(
             status_code=500,
@@ -272,6 +319,7 @@ async def upload_item_image(
 
     finally:
         await file.close()
+
 
 
 # ==========================================

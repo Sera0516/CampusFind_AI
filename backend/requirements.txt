@@ -13,3 +13,5 @@ python-multipart
 email-validator
 Pillow==12.3.0
 httpx
+cloudinary==1.47.0
+google-genai

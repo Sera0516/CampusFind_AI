@@ -1,0 +1,151 @@
+
+<div class="assistant-page">
+
+  <header class="assistant-header">
+    <div class="assistant-icon">✦</div>
+    <div>
+      <h1>CampusFind AI</h1>
+      <p>Your intelligent campus lost and found assistant</p>
+    </div>
+    <span class="status">AI Assistant</span>
+  </header>
+
+  <!-- Welcome screen -->
+  <section class="welcome" *ngIf="messages.length === 0">
+    <div class="welcome-icon">✦</div>
+
+    <h2>How can I help you today?</h2>
+
+    <p>
+      Ask me about lost or found items on your campus.
+      I'll search the reports and help you find possible matches.
+    </p>
+
+    <div class="suggestions">
+
+      <button
+        type="button"
+        (click)="useSuggestion('Has anyone found a black Dell laptop near the college library?')">
+        Has anyone found a black Dell laptop?
+      </button>
+
+      <button
+        type="button"
+        (click)="useSuggestion('Has anyone reported losing a wallet?')">
+        Has anyone lost a wallet?
+      </button>
+
+      <button
+        type="button"
+        (click)="useSuggestion('Show me recently found electronics')">
+        Recently found electronics
+      </button>
+
+    </div>
+  </section>
+
+  <!-- Chat messages -->
+  <section class="chat-area" *ngIf="messages.length > 0">
+
+    <div
+      *ngFor="let message of messages"
+      class="message"
+      [class.user-message]="message.role === 'user'"
+      [class.ai-message]="message.role === 'assistant'">
+
+      <strong>
+        {{ message.role === 'user' ? 'You' : 'CampusFind AI' }}
+      </strong>
+
+      <!-- Render formatted AI response -->
+      <div
+        class="message-content"
+        *ngIf="message.role === 'assistant'"
+        [innerHTML]="formatAnswer(message.content)">
+      </div>
+
+      <!-- User message -->
+      <p *ngIf="message.role === 'user'">
+        {{ message.content }}
+      </p>
+
+      <!-- Retrieved reports -->
+      <div
+        class="retrieved-reports"
+        *ngIf="message.role === 'assistant' && message.reports?.length">
+
+        <h3>Relevant campus reports</h3>
+
+        <article
+          *ngFor="let report of message.reports"
+          class="report">
+
+          <div class="report-heading">
+            <strong>{{ report.title }}</strong>
+
+            <span
+              class="report-type"
+              [class.found]="report.item_type === 'found'">
+              {{ report.item_type }}
+            </span>
+          </div>
+
+          <p>{{ report.description }}</p>
+
+          <small *ngIf="report.location">
+            📍 {{ report.location }}
+          </small>
+
+          <small *ngIf="report.report_ids?.length">
+            Reports: {{ report.report_ids.join(', ') }}
+          </small>
+
+          <small *ngIf="report.duplicate_count && report.duplicate_count > 1">
+            {{ report.duplicate_count }} similar reports grouped
+          </small>
+
+        </article>
+      </div>
+
+    </div>
+
+    <p *ngIf="loading" class="loading">
+      CampusFind AI is thinking...
+    </p>
+
+  </section>
+
+  <!-- Error message -->
+  <p class="error" *ngIf="error">
+    {{ error }}
+  </p>
+
+  <!-- Chat input -->
+  <form class="chat-input" (ngSubmit)="askQuestion()">
+
+    <input
+      type="text"
+      name="question"
+      [(ngModel)]="question"
+      placeholder="Ask about a lost or found item..."
+      minlength="3"
+      maxlength="1000"
+      [disabled]="loading"
+      required />
+
+    <button
+      type="submit"
+      [disabled]="loading || question.trim().length < 3">
+
+      {{ loading ? 'Searching...' : 'Ask AI ✦' }}
+
+    </button>
+
+  </form>
+
+  <footer>
+    AI responses are based on available campus reports.
+    Always verify a potential match before claiming an item.
+  </footer>
+
+</div>
